@@ -1,48 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="icon" type="image/png" href="./logo_symbol.png">
-  <title>Miraa – Video trên / Phụ đề dưới</title>
-
+  <title>Miraa – DEMNKA</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- Romaji fallback client-side (đọc Kana; Kanji đã xử lý ở server) -->
-  <script src="https://cdn.jsdelivr.net/npm/wanakana@5.3.1/umd/wanakana.min.js"></script>
+  <link rel="icon" href="logo_symbol.png" />
+
+  <!-- Firebase v10 CDN -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+    // TODO: THAY BẰNG CONFIG CỦA BẠN
+    const firebaseConfig = {
+      apiKey: "AIzaSyBkCyKuDLdNjNhB_vIE4IYO6VtWRQ8wC14",
+      authDomain: "miraa-8b1d8.firebaseapp.com",
+      projectId: "miraa-8b1d8",
+      appId: "1:954725414931:web:37054c7204e75ac46a27e6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+    // Expose cho app.js
+    window.__FIREBASE__ = { auth, provider, onAuthStateChanged, signInWithPopup, signOut };
+  </script>
 </head>
-<body class="theme-neon">
+<body>
   <header class="topbar">
-    <h1>Miraa Clone — DEMNKA Neon</h1>
+    <div class="brand">
+      <img src="./logo_symbol.png" alt="DEMNKA" class="logo">
+      <span>DEMNKA · Miraa</span>
+    </div>
+
+    <div class="auth">
+      <button id="btnSignIn" class="btn neon">Đăng nhập Google</button>
+      <button id="btnSignOut" class="btn ghost" style="display:none">Đăng xuất</button>
+      <span id="who" class="user"></span>
+    </div>
   </header>
 
-  <main>
-    <form id="urlForm" class="url-form">
-      <input type="text" id="youtubeUrl" placeholder="Dán link YouTube hoặc ID..." required />
-      <button type="submit" class="primary">Lấy phụ đề</button>
-    </form>
-
-    <!-- Player full width -->
-    <div class="player-wrap">
-      <iframe id="ytplayer" src="about:blank" allowfullscreen frameborder="0"></iframe>
-
-      <!-- Overlay loading khi API xử lý -->
-      <div id="loadingOverlay" class="loading hidden">
-        <div class="spinner"></div>
-        <p>Đang dịch bằng AI...</p>
-      </div>
+  <main class="wrap">
+    <div class="input-row">
+      <input id="ytInput" class="input" placeholder="https://www.youtube.com/watch?v=..." />
+      <button id="btnFetch" class="btn primary">Lấy phụ đề</button>
     </div>
 
-    <!-- Subtitle list -->
-    <div class="subs card">
-      <div class="subs-head">
-        <h2>Phụ đề</h2>
-        <div class="sm">Tự cuộn tới câu đang phát • Nhấn vào câu để seek</div>
-      </div>
-      <div id="subsList" class="subs-list"></div>
-    </div>
+    <div id="status" class="status muted"></div>
+
+    <section class="player-area">
+      <video id="video" controls playsinline></video>
+      <div id="subs" class="subs"></div>
+    </section>
   </main>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
