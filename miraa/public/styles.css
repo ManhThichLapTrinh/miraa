@@ -1,37 +1,100 @@
 :root{
   --bg:#0b0d14;
   --panel:#111427;
+  --panel-2:#0f1530;
   --text:#f0f4ff;
   --muted:#93a8c7;
+  --line:#1c2240;
+
   --accent:#ff0a82;
   --accent2:#31ffd8;
   --radius:14px;
+
   --glow:0 0 18px rgba(255,10,130,.45), 0 0 32px rgba(49,255,216,.35);
+  --glow-soft:0 0 10px rgba(255,10,130,.25), 0 0 18px rgba(49,255,216,.25);
 }
 
 /* Reset */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Poppins,system-ui,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+html,body{height:100%}
+body{
+  font-family:Poppins,system-ui,Segoe UI,Roboto,Arial;
+  color:var(--text);
+  background: radial-gradient(1200px 600px at 15% -10%, rgba(255,10,130,.08), transparent 60%),
+              radial-gradient(1000px 500px at 90% 0%, rgba(49,255,216,.06), transparent 55%),
+              var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
 
-.topbar{padding:12px 20px;text-align:center;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:700;box-shadow:var(--glow)}
+/* ================= Topbar ================= */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 16px;
+  background:linear-gradient(90deg,rgba(255,10,130,.25),rgba(49,255,216,.18));
+  border-bottom:1px solid var(--line);
+  box-shadow:var(--glow-soft);
+  backdrop-filter: blur(8px);
+}
+.topbar .brand{display:flex; align-items:center; gap:10px; font-weight:700}
+.topbar .brand .logo{width:28px;height:28px;border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+.topbar .auth{display:flex; align-items:center; gap:8px}
+.user{font-size:12px; color:var(--muted)}
 
-main{max-width:960px;margin:20px auto;padding:0 16px}
+/* Buttons */
+.btn{
+  appearance:none; border:0; cursor:pointer;
+  padding:9px 14px; border-radius:12px; font-weight:600;
+  color:#fff; background:#2a335a; transition:.2s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.primary{background:var(--accent); box-shadow:var(--glow)}
+.btn.primary:hover{opacity:.92}
+.btn.neon{
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  box-shadow: var(--glow);
+}
+.btn.ghost{
+  background:transparent; color:#d5dcff; border:1px solid #2d3563;
+}
+.btn.ghost:hover{background:#1a2144}
 
-/* Form nhập link */
+/* ================= Layout ================= */
+main{max-width:960px;margin:18px auto;padding:0 16px}
+
+/* Form nhập link (bản cũ) */
 .url-form{display:flex;gap:10px;align-items:center;margin-bottom:16px}
 .url-form input{
-  flex:1;padding:10px 14px;border-radius:var(--radius);border:none;outline:none;background:#0f1530;color:var(--text)
+  flex:1;padding:10px 14px;border-radius:var(--radius);border:none;outline:none;
+  background:#0f1530;color:var(--text); box-shadow:inset 0 0 0 1px #1b2246;
 }
 .url-form .primary{
-  padding:10px 16px;border:none;border-radius:var(--radius);background:var(--accent);color:#fff;font-weight:700;cursor:pointer;box-shadow:var(--glow)
+  padding:10px 16px;border:none;border-radius:var(--radius);
+  background:var(--accent);color:#fff;font-weight:700;cursor:pointer;box-shadow:var(--glow)
 }
 .url-form .primary:hover{opacity:.92}
 
-/* Player full width & chiều cao ~540px */
-.player-wrap{
-  position:relative;width:100%;margin:0 auto;border-radius:var(--radius);overflow:hidden;box-shadow:var(--glow);background:#000
+/* Form nhập link (bản mới trong index.html) */
+.input-row{display:flex; gap:10px; margin:14px 0}
+.input{
+  flex:1; padding:11px 14px; border-radius:12px; border:1px solid #1b2246;
+  background:var(--panel-2); color:var(--text); outline:none;
 }
+.input:focus{box-shadow:0 0 0 2px rgba(255,10,130,.35), 0 0 0 4px rgba(49,255,216,.25)}
+.status{margin-top:6px; font-size:12px; color:var(--muted)}
+.status.error{color:#ff849f}
+
+/* ================= Player ================= */
+.player-wrap{
+  position:relative;width:100%;margin:0 auto;border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--glow);background:#000;
+}
+/* Responsive 16:9 nếu trình duyệt hỗ trợ */
 .player-wrap iframe{width:100%;height:540px;display:block;border:0}
+@supports (aspect-ratio: 16/9){
+  .player-wrap iframe{height:auto; aspect-ratio:16/9}
+}
 
 /* Loading overlay */
 .loading{
@@ -45,10 +108,10 @@ main{max-width:960px;margin:20px auto;padding:0 16px}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Subtitles card */
+/* ================= Subtitles card ================= */
 .card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--glow);margin-top:18px}
 .subs{padding:12px}
-.subs-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1c2240;padding:8px 4px 10px}
+.subs-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 4px 10px}
 .subs-head h2{font-size:18px}
 .subs-head .sm{font-size:12px;color:var(--muted)}
 
@@ -60,11 +123,33 @@ main{max-width:960px;margin:20px auto;padding:0 16px}
 .subs-list::-webkit-scrollbar-thumb{background:#263456;border-radius:8px}
 
 /* Một dòng phụ đề */
-.line{padding:10px;border-radius:12px;cursor:pointer}
+.line{
+  padding:10px;border-radius:12px;cursor:pointer;
+  transition: background .15s ease, box-shadow .2s ease, transform .15s ease;
+}
 .line:hover{background:#0e1430}
-.line.active{background:rgba(255,10,130,.12);box-shadow:var(--glow)}
+.line.active{
+  background:linear-gradient(90deg, rgba(255,10,130,.14), rgba(49,255,216,.10));
+  box-shadow:var(--glow);
+  transform:translateY(-1px);
+}
 
 /* 3 lớp chữ */
 .jp{font-size:20px;line-height:1.35;margin-bottom:4px}
 .romaji{font-size:13px;color:var(--muted);margin-bottom:4px;letter-spacing:.2px}
 .vi{font-size:16px;color:var(--accent2)}
+
+/* ================= Responsive ================= */
+@media (max-width: 760px){
+  .topbar{gap:8px}
+  .user{display:none}
+  .jp{font-size:18px}
+  .vi{font-size:15px}
+  .subs-list{max-height:50vh}
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .line, .btn{transition:none}
+  .spinner{animation:none}
+}
