@@ -1,5 +1,5 @@
 /**
- * Miraa Clone – Backend
+ * Miraa Clone – Backend (+ Firebase Auth optional)
  * Thứ tự lấy transcript:
  * 1) youtube-transcript (thuần JS, nhanh nhất)
  * 2) ytdl-core captionTracks (fmt=vtt / fmt=srv3)
@@ -21,13 +21,61 @@ const { v4: uuidv4 } = require('uuid');
 
 // yt-dlp: tùy chọn
 let ytdlp = null;
-try { ytdlp = require('yt-dlp-exec'); }
-catch { console.warn('ℹ️ yt-dlp-exec không khả dụng (shared hosting).'); }
+try {
+  if (process.env.USE_YTDLP === '1') {
+    ytdlp = require('yt-dlp-exec');
+  }
+} catch {
+  console.warn('ℹ️ yt-dlp-exec không khả dụng (shared hosting).');
+}
 
 const ytdl = require('@distube/ytdl-core');
 const { transcript } = require('youtube-transcript');
 const { OpenAI } = require('openai');
 
+// ================= Firebase Admin (OPTIONAL) =================
+const admin = require('firebase-admin');
+
+function initFirebaseAdminFromEnv() {
+  try {
+    if (admin.apps.length) return;
+    const raw =
+      process.env.FIREBASE_SERVICE_ACCOUNT ||
+      (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64
+        ? Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8')
+        : null);
+    if (!raw) {
+      console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT(_BASE64) chưa cấu hình – API chạy không bắt buộc đăng nhập (trừ khi REQUIRE_AUTH=1).');
+      return;
+    }
+    const creds = JSON.parse(raw);
+    admin.initializeApp({ credential: admin.credential.cert(creds) });
+    console.log('✅ Firebase Admin đã khởi tạo.');
+  } catch (e) {
+    console.error('❌ Lỗi khởi tạo Firebase Admin:', e);
+  }
+}
+initFirebaseAdminFromEnv();
+
+const REQUIRE_AUTH = process.env.REQUIRE_AUTH === '1';
+async function maybeRequireAuth(req, res, next) {
+  if (!REQUIRE_AUTH) return next();
+  if (!admin.apps.length) {
+    return res.status(500).json({ error: 'Auth required nhưng Firebase Admin chưa cấu hình' });
+  }
+  try {
+    const h = req.headers.authorization || '';
+    const m = h.match(/^Bearer\s+(.+)$/i);
+    if (!m) return res.status(401).json({ error: 'Unauthenticated' });
+    const decoded = await admin.auth().verifyIdToken(m[1]);
+    req.user = decoded; // uid, email...
+    return next();
+  } catch (e) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+// ================== App ==================
 const app = express();
 app.set('trust proxy', 1);
 app.use(cors());
@@ -63,7 +111,6 @@ async function fetchCaptionsByApi(idOrUrl) {
 
 /* ---------------- Caption (ytdl-core: vtt/srv3) ---------------- */
 async function fetchCaptionsViaYtdlCore(idOrUrl) {
-  // ✅ SỬA: luôn ép về URL đầy đủ, tránh Invalid URL
   const url = asWatchUrl(idOrUrl);
 
   const info = await ytdl.getInfo(url, {
@@ -200,9 +247,7 @@ async function tryFetchYouTubeCaptions(idOrUrl, outNoExt, preferLangs = ['ja','z
 
 /* ---------------- Audio download (ytdl-core) ---------------- */
 async function downloadAudioBest(idOrUrl, outNoExt) {
-  // ✅ SỬA: luôn ép về URL đầy đủ, tránh Invalid URL
   const url = asWatchUrl(idOrUrl);
-
   const outPath = `${outNoExt}.m4a`;
   const ITAG = Number(process.env.AUDIO_ITAG || 139); // 139=48kbps, 140=128kbps
 
@@ -314,7 +359,7 @@ TRẢ VỀ:
 }
 
 /* ---------------- API ---------------- */
-app.get('/api/transcript', async (req, res) => {
+app.get('/api/transcript', maybeRequireAuth, async (req, res) => {
   const raw = String(req.query.url || '').trim();
   const skipTranslate = String(req.query.skipTranslate || '0') === '1';
   if (!raw) return res.status(400).json({ error: 'Missing url' });
