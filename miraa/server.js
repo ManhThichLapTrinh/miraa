@@ -63,10 +63,10 @@ async function fetchCaptionsByApi(idOrUrl) {
 
 /* ---------------- Caption (ytdl-core: vtt/srv3) ---------------- */
 async function fetchCaptionsViaYtdlCore(idOrUrl) {
-  const id = isYouTubeId(idOrUrl) ? idOrUrl : new URL(idOrUrl).searchParams.get('v');
-  if (!id) throw new Error('Không nhận diện được videoId');
+  // ✅ SỬA: luôn ép về URL đầy đủ, tránh Invalid URL
+  const url = asWatchUrl(idOrUrl);
 
-  const info = await ytdl.getInfo(id, {
+  const info = await ytdl.getInfo(url, {
     requestOptions: {
       headers: {
         'user-agent': 'Mozilla/5.0',
@@ -200,14 +200,14 @@ async function tryFetchYouTubeCaptions(idOrUrl, outNoExt, preferLangs = ['ja','z
 
 /* ---------------- Audio download (ytdl-core) ---------------- */
 async function downloadAudioBest(idOrUrl, outNoExt) {
-  const id = isYouTubeId(idOrUrl) ? idOrUrl : new URL(idOrUrl).searchParams.get('v');
-  if (!id) throw new Error('Không nhận diện được videoId');
+  // ✅ SỬA: luôn ép về URL đầy đủ, tránh Invalid URL
+  const url = asWatchUrl(idOrUrl);
 
   const outPath = `${outNoExt}.m4a`;
   const ITAG = Number(process.env.AUDIO_ITAG || 139); // 139=48kbps, 140=128kbps
 
   await new Promise((resolve, reject) => {
-    ytdl(id, {
+    ytdl(url, {
       quality: ITAG,
       filter: 'audioonly',
       highWaterMark: 1 << 25,
