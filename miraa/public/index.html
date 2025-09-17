@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="./logo_symbol.png">
+  <title>Miraa – Video trên / Phụ đề dưới</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Romaji fallback client-side (đọc Kana; Kanji đã xử lý ở server) -->
+  <script src="https://cdn.jsdelivr.net/npm/wanakana@5.3.1/umd/wanakana.min.js"></script>
+</head>
+<body class="theme-neon">
+  <header class="topbar">
+    <h1>Miraa Clone — DEMNKA Neon</h1>
+  </header>
+
+  <main>
+    <form id="urlForm" class="url-form">
+      <input type="text" id="youtubeUrl" placeholder="Dán link YouTube hoặc ID..." required />
+      <button type="submit" class="primary">Lấy phụ đề</button>
+    </form>
+
+    <!-- Player full width -->
+    <div class="player-wrap">
+      <iframe id="ytplayer" src="about:blank" allowfullscreen frameborder="0"></iframe>
+
+      <!-- Overlay loading khi API xử lý -->
+      <div id="loadingOverlay" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Đang dịch bằng AI...</p>
+      </div>
+    </div>
+
+    <!-- Subtitle list -->
+    <div class="subs card">
+      <div class="subs-head">
+        <h2>Phụ đề</h2>
+        <div class="sm">Tự cuộn tới câu đang phát • Nhấn vào câu để seek</div>
+      </div>
+      <div id="subsList" class="subs-list"></div>
+    </div>
+  </main>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="app.js"></script>
+</body>
+</html>

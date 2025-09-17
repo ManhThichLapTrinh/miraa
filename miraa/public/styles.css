@@ -1,0 +1,70 @@
+:root{
+  --bg:#0b0d14;
+  --panel:#111427;
+  --text:#f0f4ff;
+  --muted:#93a8c7;
+  --accent:#ff0a82;
+  --accent2:#31ffd8;
+  --radius:14px;
+  --glow:0 0 18px rgba(255,10,130,.45), 0 0 32px rgba(49,255,216,.35);
+}
+
+/* Reset */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,system-ui,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+
+.topbar{padding:12px 20px;text-align:center;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:700;box-shadow:var(--glow)}
+
+main{max-width:960px;margin:20px auto;padding:0 16px}
+
+/* Form nhập link */
+.url-form{display:flex;gap:10px;align-items:center;margin-bottom:16px}
+.url-form input{
+  flex:1;padding:10px 14px;border-radius:var(--radius);border:none;outline:none;background:#0f1530;color:var(--text)
+}
+.url-form .primary{
+  padding:10px 16px;border:none;border-radius:var(--radius);background:var(--accent);color:#fff;font-weight:700;cursor:pointer;box-shadow:var(--glow)
+}
+.url-form .primary:hover{opacity:.92}
+
+/* Player full width & chiều cao ~540px */
+.player-wrap{
+  position:relative;width:100%;margin:0 auto;border-radius:var(--radius);overflow:hidden;box-shadow:var(--glow);background:#000
+}
+.player-wrap iframe{width:100%;height:540px;display:block;border:0}
+
+/* Loading overlay */
+.loading{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.55);color:#fff;font-size:16px
+}
+.loading.hidden{display:none}
+.spinner{
+  width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;
+  animation:spin 1s linear infinite;margin-bottom:10px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Subtitles card */
+.card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--glow);margin-top:18px}
+.subs{padding:12px}
+.subs-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1c2240;padding:8px 4px 10px}
+.subs-head h2{font-size:18px}
+.subs-head .sm{font-size:12px;color:var(--muted)}
+
+.subs-list{
+  max-height:400px;overflow:auto;padding:10px 4px;margin-top:6px;
+  scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#263456 transparent
+}
+.subs-list::-webkit-scrollbar{width:8px}
+.subs-list::-webkit-scrollbar-thumb{background:#263456;border-radius:8px}
+
+/* Một dòng phụ đề */
+.line{padding:10px;border-radius:12px;cursor:pointer}
+.line:hover{background:#0e1430}
+.line.active{background:rgba(255,10,130,.12);box-shadow:var(--glow)}
+
+/* 3 lớp chữ */
+.jp{font-size:20px;line-height:1.35;margin-bottom:4px}
+.romaji{font-size:13px;color:var(--muted);margin-bottom:4px;letter-spacing:.2px}
+.vi{font-size:16px;color:var(--accent2)}
