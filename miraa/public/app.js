@@ -1,7 +1,7 @@
 /* ====== Video trên / Phụ đề dưới – romaji server + fallback client, loading, auto-scroll ====== */
 
 /** ĐỔI URL này sang domain backend thật của bạn */
-const API_BASE = ''
+const API_BASE = 'https://miraa-b32l.onrender.com';
 
 let player = null;
 let transcript = [];
@@ -170,3 +170,4 @@ if (iframe.src !== embed) iframe.src = embed;
     alert('Không lấy được phụ đề từ API. Kiểm tra server nhé.');
   }
 });
+
