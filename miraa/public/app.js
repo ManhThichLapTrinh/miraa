@@ -1,4 +1,4 @@
-/* ====== Video trên / Phụ đề dưới – romaji server + fallback client, loading, auto-scroll ====== */
+/* ====== Video trên / Phụ đề dưới – romaji server + fallback client, loading, auto-scroll + Firebase Auth ====== */
 
 /** ĐỔI URL này sang domain backend thật của bạn */
 const API_BASE = 'https://miraa-b32l.onrender.com';
@@ -8,6 +8,46 @@ let transcript = [];
 let pendingVideoId = null;
 let activeIndex = -1;
 let pollTimer = null;
+
+/* ---------------- Firebase Auth (tùy chọn) ----------------
+   - index.html cần nhúng SDK và gắn window.__FIREBASE__ (auth, provider, onAuthStateChanged, signInWithPopup, signOut)
+   - Nếu không có, khối này tự bỏ qua, app vẫn hoạt động bình thường.
+---------------------------------------------------------------- */
+const FB = window.__FIREBASE__ || {};
+let currentIdToken = null;
+
+const elIn  = document.getElementById('btnSignIn');
+const elOut = document.getElementById('btnSignOut');
+const elWho = document.getElementById('who');
+
+if (FB && FB.auth && FB.onAuthStateChanged) {
+  // Gắn nút (nếu tồn tại trong DOM)
+  elIn?.addEventListener('click', async () => {
+    try { await FB.signInWithPopup(FB.auth, FB.provider); } catch (e) { console.error(e); }
+  });
+  elOut?.addEventListener('click', async () => {
+    try { await FB.signOut(FB.auth); } catch (e) { console.error(e); }
+  });
+
+  FB.onAuthStateChanged(FB.auth, async (user) => {
+    try {
+      if (user) {
+        elIn && (elIn.style.display = 'none');
+        elOut && (elOut.style.display = '');
+        if (elWho) elWho.textContent = `Xin chào, ${user.displayName || user.email || user.uid}`;
+        currentIdToken = await user.getIdToken(true);
+      } else {
+        elIn && (elIn.style.display = '');
+        elOut && (elOut.style.display = 'none');
+        if (elWho) elWho.textContent = '';
+        currentIdToken = null;
+      }
+    } catch (e) {
+      console.error('Auth state error:', e);
+      currentIdToken = null;
+    }
+  });
+}
 
 /* ---------------- Helpers ---------------- */
 function parseYouTubeId(input) {
@@ -123,8 +163,7 @@ document.getElementById('urlForm').addEventListener('submit', async (e) => {
 
   const iframe = document.getElementById('ytplayer');
   const embed = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${location.origin}`;
-if (iframe.src !== embed) iframe.src = embed;
-
+  if (iframe.src !== embed) iframe.src = embed;
 
   if (player && typeof player.loadVideoById === 'function') {
     try { player.loadVideoById(videoId); } catch {}
@@ -135,7 +174,11 @@ if (iframe.src !== embed) iframe.src = embed;
   const urlApi = `${API_BASE}/api/transcript?url=${encodeURIComponent(raw)}`;
   try {
     setLoading(true);
-    const res = await fetch(urlApi);
+
+    // === Gửi kèm Firebase ID token nếu có ===
+    const headers = currentIdToken ? { 'Authorization': `Bearer ${currentIdToken}` } : {};
+
+    const res = await fetch(urlApi, { headers });
     const txt = await res.text();
     setLoading(false);
 
@@ -170,4 +213,3 @@ if (iframe.src !== embed) iframe.src = embed;
     alert('Không lấy được phụ đề từ API. Kiểm tra server nhé.');
   }
 });
-
